@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Percent of an Amount – Created by Mr. McLean Math</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #ffffff;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 34px;
+        margin-bottom: 10px;
+    }
+
+    .controls, .workspace {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 12px;
+        background: #f7f7f7;
+    }
+
+    .high-contrast body, .high-contrast .controls, .high-contrast .workspace {
+        background: #000 !important;
+        color: #fff !important;
+    }
+
+    label {
+        font-size: 22px;
+    }
+
+    input[type="number"], input[type="text"] {
+        font-size: 26px;
+        padding: 6px 10px;
+        width: 200px;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 22px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin: 5px;
+    }
+
+    button:hover {
+        opacity: 0.9;
+    }
+
+    .btn-primary { background: #4CAF50; color: white; }
+    .btn-warn { background: #f44336; color: white; }
+    .btn-neutral { background: #2196F3; color: white; }
+
+    .difficulty-btn {
+        font-size: 22px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #e0e0e0;
+        margin-right: 10px;
+    }
+    .difficulty-btn.selected {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .feedback {
+        margin-top: 20px;
+        font-size: 28px;
+        min-height: 40px;
+    }
+
+    .question {
+        font-size: 32px;
+        margin-top: 20px;
+    }
+
+    .worksheet-question {
+        font-size: 28px;
+        margin-bottom: 35px; /* CRITICAL SPACING */
+        padding-bottom: 20px; /* More spacing */
+        border-bottom: 1px solid #ccc;
+    }
+
+    .footer {
+        margin-top: 40px;
+        font-size: 18px;
+        text-align: center;
+        opacity: 0.7;
+    }
+
+    .steps-box {
+        margin-top: 20px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 22px;
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Percent of an Amount</h1>
+
+<div class="controls">
+    <div>
+        <span class="difficulty-btn" data-diff="easy">🟢 Easy</span>
+        <span class="difficulty-btn" data-diff="medium">🟡 Medium</span>
+        <span class="difficulty-btn" data-diff="hard">🔴 Hard</span>
+        <span class="difficulty-btn" data-diff="random">🎲 Random</span>
+    </div>
+
+    <br />
+
+    <button class="btn-neutral" id="toggleModeBtn">Switch to Worksheet Mode</button>
+    <button class="btn-neutral" id="toggleContrastBtn">High Contrast: ON</button>
+    <button class="btn-neutral" id="toggleTimerBtn">Timer: OFF</button>
+</div>
+
+<div class="workspace" id="gameMode">
+    <div class="question" id="questionText"></div>
+
+    <input type="text" id="answerInput" placeholder="Enter answer" />
+
+    <div>
+        <button class="btn-primary" id="submitBtn">Submit</button>
+        <button class="btn-neutral" id="nextBtn" style="display:none;">Next</button>
+    </div>
+
+    <div class="feedback" id="feedbackPanel"></div>
+
+    <div id="stepsContainer"></div>
+</div>
+
+<div class="workspace" id="worksheetMode" style="display:none;">
+    <label>Worksheet size: </label>
+    <button class="btn-neutral ws-size" data-size="5">5</button>
+    <button class="btn-neutral ws-size" data-size="10">10</button>
+    <button class="btn-neutral ws-size" data-size="15">15</button>
+
+    <div id="worksheetArea" style="margin-top:30px;"></div>
+
+    <button class="btn-primary" id="revealAllBtn">Reveal All</button>
+    <button class="btn-warn" id="hideAllBtn">Hide All</button>
+</div>
+
+<div class="footer">
+    Created by Mr. McLean Math
+</div>
+
+</div>
+
+<script>
+
+////////////////////////////////////////////
+// GLOBAL SETTINGS
+////////////////////////////////////////////
+
+let currentDifficulty = "easy";
+let currentPercent = 0;
+let currentAmount = 0;
+let correctAnswer = 0;
+let awaitingNext = false;
+
+let highContrast = true;
+let timerOn = false;
+let timerInterval = null;
+
+document.getElementById("toggleContrastBtn").onclick = () => {
+    highContrast = !highContrast;
+    if (highContrast) {
+        document.body.classList.add("high-contrast");
+        document.getElementById("toggleContrastBtn").innerText = "High Contrast: ON";
+    } else {
+        document.body.classList.remove("high-contrast");
+        document.getElementById("toggleContrastBtn").innerText = "High Contrast: OFF";
+    }
+};
+
+////////////////////////////////////////////
+// DIFFICULTY BUTTONS
+////////////////////////////////////////////
+
+document.querySelectorAll(".difficulty-btn").forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll(".difficulty-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        currentDifficulty = btn.dataset.diff;
+        generateQuestion();
+    };
+});
+
+// Default select easy
+document.querySelector('[data-diff="easy"]').classList.add("selected");
+
+////////////////////////////////////////////
+// NUMBER GENERATION
+////////////////////////////////////////////
+
+function generatePercentAmount() {
+    let p, a;
+
+    if (currentDifficulty === "easy") {
+        p = randInt(25, 90);
+        a = randInt(5, 30);
+    }
+    else if (currentDifficulty === "medium") {
+        p = randInt(90, 120);
+        a = randInt(10, 60);
+    }
+    else if (currentDifficulty === "hard") {
+        p = randInt(121, 250);
+        a = randInt(10, 100);
+    }
+    else { // random
+        const diffs = ["easy", "medium", "hard"];
+        currentDifficulty = diffs[randInt(0,2)];
+        return generatePercentAmount();
+    }
+
+    return [p, a];
+}
+
+function formatAnswer(x) {
+    return Number(x.toFixed(2));
+}
+
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+////////////////////////////////////////////
+// GAME QUESTION GENERATION
+////////////////////////////////////////////
+
+function generateQuestion() {
+    awaitingNext = false;
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("feedbackPanel").innerHTML = "";
+    document.getElementById("stepsContainer").innerHTML = "";
+
+    [currentPercent, currentAmount] = generatePercentAmount();
+
+    correctAnswer = formatAnswer(currentPercent * currentAmount / 100);
+
+    document.getElementById("questionText").innerText =
+        `What is ${currentPercent}% of ${currentAmount}?`;
+
+    document.getElementById("answerInput").value = "";
+    document.getElementById("answerInput").focus();
+}
+
+generateQuestion();
+
+////////////////////////////////////////////
+// SUBMIT LOGIC
+////////////////////////////////////////////
+
+document.getElementById("submitBtn").onclick = checkAnswer;
+
+function checkAnswer() {
+    if (awaitingNext) return;
+
+    let user = document.getElementById("answerInput").value.trim();
+    user = user.replace(",", ".");
+    if (isNaN(user) || user === "") return;
+
+    let num = Number(user);
+    let fb = document.getElementById("feedbackPanel");
+
+    if (Math.abs(num - correctAnswer) < 0.0001) {
+        fb.style.color = "green";
+        fb.innerText = "Correct!";
+        awaitingNext = true;
+        document.getElementById("nextBtn").style.display = "inline-block";
+    } else {
+        fb.style.color = "red";
+        fb.innerText = "Incorrect";
+
+        showSteps();
+    }
+}
+
+document.getElementById("nextBtn").onclick = generateQuestion;
+
+document.getElementById("answerInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        if (awaitingNext) generateQuestion();
+        else checkAnswer();
+    }
+    if (e.key === "Escape") {
+        document.getElementById("answerInput").value = "";
+    }
+});
+
+////////////////////////////////////////////
+// STEPS
+////////////////////////////////////////////
+
+function showSteps() {
+    const steps = `
+        <div class="steps-box">
+            Step 1: Convert percent to a decimal → ${currentPercent}% = ${currentPercent}/100<br>
+            Step 2: Multiply by the amount → (${currentPercent}/100) × ${currentAmount}<br>
+            Step 3: Calculate the value → ${correctAnswer}
+        </div>
+    `;
+    document.getElementById("stepsContainer").innerHTML = steps;
+}
+
+////////////////////////////////////////////
+// MODE SWITCHING
+////////////////////////////////////////////
+
+document.getElementById("toggleModeBtn").onclick = () => {
+    let gm = document.getElementById("gameMode");
+    let wm = document.getElementById("worksheetMode");
+
+    if (gm.style.display !== "none") {
+        gm.style.display = "none";
+        wm.style.display = "block";
+        document.getElementById("toggleModeBtn").innerText = "Switch to Game Mode";
+    } else {
+        wm.style.display = "none";
+        gm.style.display = "block";
+        document.getElementById("toggleModeBtn").innerText = "Switch to Worksheet Mode";
+        generateQuestion();
+    }
+};
+
+////////////////////////////////////////////
+// WORKSHEET MODE
+////////////////////////////////////////////
+
+document.querySelectorAll(".ws-size").forEach(btn => {
+    btn.onclick = () => {
+        const size = Number(btn.dataset.size);
+        buildWorksheet(size);
+    };
+});
+
+function buildWorksheet(n) {
+    const area = document.getElementById("worksheetArea");
+    area.innerHTML = "";
+
+    for (let i = 1; i <= n; i++) {
+        const [p, a] = generatePercentAmount();
+        const ans = formatAnswer(p * a / 100);
+
+        const block = document.createElement("div");
+        block.className = "worksheet-question";
+        block.innerHTML = `
+            ${i}. What is ${p}% of ${a}? 
+            <span id="ws-ans-${i}" style="display:none; color:blue; font-weight:bold;">
+                &nbsp;= ${ans}
+            </span>
+            <button class="btn-neutral" onclick="reveal(${i})">Reveal</button>
+        `;
+        area.appendChild(block);
+    }
+}
+
+function reveal(i) {
+    document.getElementById(`ws-ans-${i}`).style.display = "inline";
+}
+
+document.getElementById("revealAllBtn").onclick = () => {
+    document.querySelectorAll("[id^='ws-ans']").forEach(span => {
+        span.style.display = "inline";
+    });
+};
+
+document.getElementById("hideAllBtn").onclick = () => {
+    document.querySelectorAll("[id^='ws-ans']").forEach(span => {
+        span.style.display = "none";
+    });
+};
+
+</script>
+</body>
+</html>

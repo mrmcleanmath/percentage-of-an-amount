@@ -1,69 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Percent of an Amount — Mr. McLean Math</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Percent Increase and Decrease — Mr. McLean Math</title>
 <style>
   :root{
-    --bg:#ffffff;
-    --panel:#f7f8fa;
-    --ink:#15171a;
-    --muted:#62666d;
+    --bg:#f5f6f8;
+    --panel:#ffffff;
+    --text:#202124;
+    --muted:#666b73;
     --border:#d9dde3;
-    --accent:#2563eb;
-    --good:#177a38;
-    --bad:#b42318;
-    --focus:#f3b61f;
+    --accent:#1976d2;
+    --accent-soft:#e8f1fb;
+    --good:#247a3b;
+    --bad:#b3261e;
+    --focus:#f5b400;
   }
   *{box-sizing:border-box}
   body{
     margin:0;
     background:var(--bg);
-    color:var(--ink);
-    font-family:Arial,Helvetica,sans-serif;
+    color:var(--text);
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     line-height:1.5;
   }
   body.high-contrast{
     --bg:#000;
     --panel:#090909;
-    --ink:#fff;
+    --text:#fff;
     --muted:#ddd;
     --border:#777;
-    --accent:#00e5ff;
-    --good:#5cff7a;
-    --bad:#ff6b6b;
+    --accent:#00d7ff;
+    --accent-soft:#111;
+    --good:#68ff8b;
+    --bad:#ff7474;
     --focus:#ffea00;
   }
-  .container{max-width:820px;margin:0 auto;padding:20px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-  h1{font-size:clamp(28px,5vw,36px);margin:0}
-  .mode-tabs,.difficulty{display:flex;gap:8px;flex-wrap:wrap}
-  button{
-    font:inherit;
-    font-weight:700;
-    padding:10px 14px;
-    border:1px solid var(--border);
-    border-radius:10px;
-    background:var(--bg);
-    color:var(--ink);
-    cursor:pointer;
-  }
-  button:hover{border-color:var(--accent)}
-  button:focus-visible,input:focus-visible{
-    outline:3px solid var(--focus);
-    outline-offset:2px;
-  }
-  button[aria-pressed="true"],.primary{
-    background:var(--accent);
-    color:#fff;
-    border-color:var(--accent);
-  }
-  .topbar{
+  .app{max-width:820px;margin:0 auto;padding:18px}
+  header{
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  h1{margin:0;font-size:clamp(28px,5vw,36px)}
+  .mode-buttons,.difficulty,.ws-controls{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  button,select,input{
+    font:inherit;
+  }
+  button,select{
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--panel);
+    color:var(--text);
+    padding:9px 13px;
+  }
+  button{cursor:pointer;font-weight:650}
+  button:hover{border-color:var(--accent)}
+  button:focus-visible,input:focus-visible,select:focus-visible{
+    outline:3px solid var(--focus);
+    outline-offset:2px;
+  }
+  button[aria-pressed="true"],button.primary{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+  }
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:center;
     flex-wrap:wrap;
     margin-bottom:14px;
   }
@@ -73,23 +88,38 @@
     border-radius:16px;
     padding:18px;
   }
-  .game{display:grid;gap:16px}
+  .practice{
+    display:grid;
+    gap:16px;
+  }
   .question{
+    text-align:center;
     font-size:clamp(26px,5vw,34px);
     font-weight:700;
-    text-align:center;
-    padding:14px 8px;
+    padding:12px 6px 2px;
   }
-  .answer-row{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .rounding-note{
+    text-align:center;
+    color:var(--muted);
+    font-size:14px;
+    margin-top:-8px;
+  }
+  .answer-row{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+  }
   input[type="text"]{
     width:min(260px,100%);
-    font-size:22px;
-    text-align:center;
-    padding:11px 12px;
     border:1px solid var(--border);
     border-radius:10px;
-    background:var(--bg);
-    color:var(--ink);
+    padding:11px 12px;
+    font-size:22px;
+    text-align:center;
+    background:var(--panel);
+    color:var(--text);
   }
   .feedback{
     min-height:28px;
@@ -97,65 +127,69 @@
     font-size:18px;
     font-weight:700;
   }
-  .feedback.good{color:var(--good)}
-  .feedback.bad{color:var(--bad)}
+  .feedback.correct{color:var(--good)}
+  .feedback.incorrect{color:var(--bad)}
   .steps{
-    margin:0 auto;
     max-width:620px;
-    background:var(--bg);
+    width:100%;
+    margin:0 auto;
     border:1px solid var(--border);
     border-radius:12px;
+    background:var(--accent-soft);
     padding:12px 14px;
   }
   .steps ol{margin:6px 0 0;padding-left:24px}
   .stats{
     display:flex;
     justify-content:center;
-    gap:18px;
+    gap:20px;
     color:var(--muted);
     font-size:15px;
   }
   .worksheet{display:none}
-  .ws-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
-  .ws-list{display:grid;gap:10px}
-  .ws-item{
-    background:var(--bg);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:12px;
+  .ws-controls{margin-bottom:14px}
+  .ws-list{
+    margin:0;
+    padding-left:26px;
   }
-  .ws-answer{display:none;margin-top:6px;font-weight:700}
-  .muted{color:var(--muted)}
+  .ws-item{
+    margin-bottom:18px;
+    padding:0 0 14px 2px;
+    border-bottom:1px solid var(--border);
+  }
+  .ws-question{font-size:17px;font-weight:600}
+  .ws-answer{display:none;margin-top:6px;color:var(--good);font-weight:700}
+  .ws-reveal{margin-top:7px;padding:6px 10px;font-size:14px}
   footer{text-align:center;color:var(--muted);font-size:14px;margin-top:18px}
   .sr-only{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
   @media(max-width:560px){
-    .container{padding:14px}
+    .app{padding:13px}
     .panel{padding:14px}
     .answer-row{align-items:stretch}
-    input[type="text"], .answer-row button{width:100%}
+    input[type="text"],.answer-row button{width:100%}
   }
   @media print{
-    header,.topbar,footer,.ws-controls button,.ws-reveal{display:none!important}
+    header,.toolbar,footer,.ws-controls,.ws-reveal{display:none!important}
     body{background:#fff;color:#000}
-    .container{max-width:none;padding:0}
+    .app{max-width:none;padding:0}
     .panel{border:0;padding:0;background:#fff}
     .worksheet{display:block!important}
-    .ws-item{break-inside:avoid;border:0;border-bottom:1px solid #bbb;border-radius:0}
+    .ws-item{break-inside:avoid}
     .ws-answer{display:none!important}
   }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="app">
   <header>
-    <h1>Percent of an Amount</h1>
-    <div class="mode-tabs" role="group" aria-label="Mode">
+    <h1>Percent Increase &amp; Decrease</h1>
+    <div class="mode-buttons" role="group" aria-label="Mode">
       <button id="practiceBtn" aria-pressed="true">Practice</button>
       <button id="worksheetBtn" aria-pressed="false">Worksheet</button>
     </div>
   </header>
 
-  <div class="topbar">
+  <div class="toolbar">
     <div class="difficulty" id="difficulty" role="group" aria-label="Difficulty">
       <button data-diff="foundation" aria-pressed="true">Foundation</button>
       <button data-diff="core" aria-pressed="false">Core</button>
@@ -164,17 +198,19 @@
     <button id="contrastBtn" aria-pressed="false">High contrast</button>
   </div>
 
-  <section id="practice" class="panel game" aria-label="Practice mode">
+  <section id="practice" class="panel practice" aria-label="Practice mode">
     <div id="question" class="question" aria-live="polite"></div>
+    <div class="rounding-note">Round to the nearest hundredth if needed.</div>
 
     <div class="answer-row">
       <input id="answer" type="text" inputmode="decimal" autocomplete="off"
-             aria-label="Your answer" placeholder="Enter answer" />
+             aria-label="Your answer" placeholder="Enter answer">
       <button id="check" class="primary">Check</button>
       <button id="next" hidden>Next</button>
     </div>
 
     <div id="feedback" class="feedback" aria-live="polite"></div>
+    <button id="showSteps" hidden style="justify-self:center">Show steps</button>
     <div id="steps" class="steps" hidden></div>
 
     <div class="stats" aria-live="polite">
@@ -185,16 +221,30 @@
 
   <section id="worksheet" class="panel worksheet" aria-label="Worksheet mode">
     <div class="ws-controls">
-      <span class="muted">Questions:</span>
-      <button data-size="5">5</button>
-      <button data-size="10" class="primary">10</button>
-      <button data-size="15">15</button>
+      <label for="wsDifficulty">Difficulty:</label>
+      <select id="wsDifficulty">
+        <option value="foundation">Foundation</option>
+        <option value="core">Core</option>
+        <option value="challenge">Challenge</option>
+      </select>
+
+      <label for="wsCount">Questions:</label>
+      <select id="wsCount">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="15">15</option>
+      </select>
+
       <button id="generateWs">Generate</button>
       <button id="revealAll">Reveal all</button>
       <button id="hideAll">Hide all</button>
       <button id="printWs">Print</button>
     </div>
-    <div id="wsList" class="ws-list"></div>
+
+    <p class="rounding-note" style="text-align:left;margin:0 0 14px">
+      Calculate the new value after the percent increase or decrease. Round to the nearest hundredth if needed.
+    </p>
+    <ol id="wsList" class="ws-list"></ol>
   </section>
 
   <footer>Created by Mr. McLean Math</footer>
@@ -206,15 +256,12 @@ const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
 const state = {
-  mode: 'practice',
-  difficulty: 'foundation',
-  percent: 0,
-  amount: 0,
-  answer: 0,
-  evaluated: false,
-  correct: 0,
-  incorrect: 0,
-  worksheetSize: 10
+  mode:'practice',
+  difficulty:'foundation',
+  current:null,
+  evaluated:false,
+  correct:0,
+  incorrect:0
 };
 
 function randInt(min,max){
@@ -222,234 +269,317 @@ function randInt(min,max){
 }
 
 /*
-  Preserve the original educational ranges:
-  Easy      25–90%   of 5–30
-  Medium    90–120%  of 10–60
-  Hard      121–250% of 10–100
-
-  Only the labels are standardized to Foundation/Core/Challenge.
+  Original educational progression preserved:
+  Foundation (old Easy): 5–30%, base 10–150, whole percentages.
+  Core (old Medium): 10–60%, base 20–200, whole percentages.
+  Challenge (old Hard): 1–90%, base 50–999, with a 25% chance
+  of a half percentage (x.5).
 */
-function generatePercentAmount(diff = state.difficulty){
-  if(diff === 'foundation') return [randInt(25,90), randInt(5,30)];
-  if(diff === 'core') return [randInt(90,120), randInt(10,60)];
-  return [randInt(121,250), randInt(10,100)];
+function generatePercent(diff){
+  if(diff==='foundation') return randInt(5,30);
+  if(diff==='core') return randInt(10,60);
+
+  if(Math.random()<0.25){
+    return randInt(1,90)+0.5;
+  }
+  return randInt(1,90);
 }
 
-function exactPercentOfAmount(p,a){
-  // p and a are integers, so p*a/100 has at most two decimal places.
-  return (p*a)/100;
+function generateBase(diff){
+  if(diff==='foundation') return randInt(10,150);
+  if(diff==='core') return randInt(20,200);
+  return randInt(50,999);
 }
 
-function formatNumber(n){
-  const rounded = Math.round((n + Number.EPSILON) * 100) / 100;
-  return String(rounded);
+function percentTenths(percent){
+  return Math.round(percent*10);
+}
+
+// Exact half-up rounding to cents for this app's non-negative values.
+// Percentages are whole or x.5, so every exact result is representable
+// as an integer numerator over 1000.
+function resultCents(base,pTenths,type){
+  const multiplierTenths = type==='increase'
+    ? 1000 + pTenths
+    : 1000 - pTenths;
+  const numerator = base * multiplierTenths; // exact thousandths
+  return Math.floor((numerator + 5) / 10);   // nearest cent, half up
+}
+
+function exactResultThousandths(base,pTenths,type){
+  const multiplierTenths = type==='increase'
+    ? 1000 + pTenths
+    : 1000 - pTenths;
+  return base * multiplierTenths;
+}
+
+function generateQuestion(diff=state.difficulty){
+  const base = generateBase(diff);
+  const percent = generatePercent(diff);
+  const pTenths = percentTenths(percent);
+  const type = Math.random()<0.5 ? 'increase' : 'decrease';
+  const cents = resultCents(base,pTenths,type);
+  return {difficulty:diff,base,percent,pTenths,type,cents};
+}
+
+function formatCents(cents){
+  const whole = Math.floor(cents/100);
+  const rem = cents%100;
+  if(rem===0) return String(whole);
+  if(rem%10===0) return `${whole}.${Math.floor(rem/10)}`;
+  return `${whole}.${String(rem).padStart(2,'0')}`;
+}
+
+function formatPercent(p){
+  return Number.isInteger(p) ? String(p) : p.toFixed(1);
 }
 
 function parseAnswer(raw){
-  const s = raw.trim().replace(/\s+/g,'').replace(',', '.');
+  const s=raw.trim().replace(/\s+/g,'').replace(',', '.');
   if(!s || !/^[+]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(s)) return null;
-  const n = Number(s);
+  const n=Number(s);
   return Number.isFinite(n) ? n : null;
 }
 
+function questionText(q){
+  const verb=q.type==='increase' ? 'Increase' : 'Decrease';
+  return `${verb} ${q.base} by ${formatPercent(q.percent)}%`;
+}
+
 function announce(msg){
-  const live = $('#live');
-  live.textContent = '';
-  setTimeout(()=> live.textContent = msg, 10);
+  const live=$('#live');
+  live.textContent='';
+  setTimeout(()=>live.textContent=msg,10);
 }
 
 function newQuestion(){
-  [state.percent,state.amount] = generatePercentAmount();
-  state.answer = exactPercentOfAmount(state.percent,state.amount);
-  state.evaluated = false;
+  state.current=generateQuestion();
+  state.evaluated=false;
 
-  $('#question').textContent = `What is ${state.percent}% of ${state.amount}?`;
-  $('#answer').value = '';
-  $('#feedback').textContent = '';
-  $('#feedback').className = 'feedback';
-  $('#steps').hidden = true;
-  $('#steps').innerHTML = '';
-  $('#check').disabled = false;
-  $('#next').hidden = true;
-  $('#answer').disabled = false;
+  $('#question').textContent=questionText(state.current);
+  $('#answer').value='';
+  $('#answer').disabled=false;
+  $('#check').disabled=false;
+  $('#next').hidden=true;
+  $('#feedback').textContent='';
+  $('#feedback').className='feedback';
+  $('#showSteps').hidden=true;
+  $('#steps').hidden=true;
+  $('#steps').innerHTML='';
   $('#answer').focus();
 }
 
-function showSteps(){
-  const decimal = state.percent / 100;
-  $('#steps').innerHTML = `
+function buildSteps(q){
+  const pct=formatPercent(q.percent);
+  const decimal=(q.pTenths/1000).toString();
+  const changeThousandths=q.base*q.pTenths; // base * percent/100, exact in thousandths
+  const changeExact=changeThousandths/1000;
+  const resultExact=exactResultThousandths(q.base,q.pTenths,q.type)/1000;
+  const sign=q.type==='increase' ? '+' : '−';
+
+  const resultExactText = Number.isInteger(resultExact)
+    ? String(resultExact)
+    : String(resultExact);
+
+  return `
     <strong>Worked steps</strong>
     <ol>
-      <li>Convert the percent to a decimal: ${state.percent}% = ${formatNumber(decimal)}</li>
-      <li>Multiply: ${formatNumber(decimal)} × ${state.amount}</li>
-      <li>Answer: ${formatNumber(state.answer)}</li>
+      <li>${pct}% = ${decimal}</li>
+      <li>Find the change: ${q.base} × ${decimal} = ${changeExact}</li>
+      <li>New value: ${q.base} ${sign} ${changeExact} = ${resultExactText}</li>
+      ${Math.abs(resultExact*100-Math.round(resultExact*100))>1e-9
+        ? `<li>Round to the nearest hundredth: ${formatCents(q.cents)}</li>`
+        : ''}
     </ol>`;
-  $('#steps').hidden = false;
 }
 
 function checkAnswer(){
   if(state.evaluated) return;
 
-  const value = parseAnswer($('#answer').value);
-  if(value === null){
-    $('#feedback').textContent = 'Enter an answer first.';
-    $('#feedback').className = 'feedback bad';
+  const value=parseAnswer($('#answer').value);
+  if(value===null){
+    $('#feedback').textContent='Enter an answer first.';
+    $('#feedback').className='feedback incorrect';
     announce('Enter an answer first.');
     return;
   }
 
-  state.evaluated = true;
-  $('#check').disabled = true;
-  $('#answer').disabled = true;
-  $('#next').hidden = false;
+  state.evaluated=true;
+  $('#answer').disabled=true;
+  $('#check').disabled=true;
+  $('#next').hidden=false;
 
-  const correct = Math.abs(value - state.answer) < 1e-9;
-  if(correct){
+  const correctValue=state.current.cents/100;
+  const isCorrect=Math.abs(value-correctValue)<1e-9;
+
+  if(isCorrect){
     state.correct++;
-    $('#feedback').textContent = 'Correct!';
-    $('#feedback').className = 'feedback good';
+    $('#feedback').textContent='Correct!';
+    $('#feedback').className='feedback correct';
     announce('Correct');
   }else{
     state.incorrect++;
-    $('#feedback').textContent = `Incorrect. Correct answer: ${formatNumber(state.answer)}`;
-    $('#feedback').className = 'feedback bad';
-    showSteps();
+    $('#feedback').textContent=`Incorrect. Correct answer: ${formatCents(state.current.cents)}`;
+    $('#feedback').className='feedback incorrect';
+    $('#showSteps').hidden=false;
     announce('Incorrect');
   }
 
-  $('#correctCount').textContent = state.correct;
-  $('#incorrectCount').textContent = state.incorrect;
+  $('#correctCount').textContent=state.correct;
+  $('#incorrectCount').textContent=state.incorrect;
 }
 
-function setDifficulty(diff, button){
-  state.difficulty = diff;
-  $$('#difficulty button').forEach(b=>{
-    const on = b === button;
-    b.setAttribute('aria-pressed', String(on));
-  });
-  if(state.mode === 'practice') newQuestion();
-}
-
-$('#difficulty').addEventListener('click', e=>{
-  const btn = e.target.closest('button[data-diff]');
-  if(btn) setDifficulty(btn.dataset.diff, btn);
+$('#showSteps').addEventListener('click',()=>{
+  $('#steps').innerHTML=buildSteps(state.current);
+  $('#steps').hidden=false;
+  $('#showSteps').hidden=true;
 });
 
-$('#check').addEventListener('click', checkAnswer);
-$('#next').addEventListener('click', newQuestion);
+$('#check').addEventListener('click',checkAnswer);
+$('#next').addEventListener('click',newQuestion);
 
-$('#answer').addEventListener('keydown', e=>{
-  if(e.key === 'Enter'){
+$('#answer').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
     if(state.evaluated) newQuestion();
     else checkAnswer();
-  }else if(e.key === 'Escape' && !state.evaluated){
-    $('#answer').value = '';
+  }else if(e.key==='Escape' && !state.evaluated){
+    $('#answer').value='';
   }
 });
 
-function switchMode(mode){
-  state.mode = mode;
-  const practice = mode === 'practice';
-  $('#practice').style.display = practice ? 'grid' : 'none';
-  $('#worksheet').style.display = practice ? 'none' : 'block';
-  $('#practiceBtn').setAttribute('aria-pressed', String(practice));
-  $('#worksheetBtn').setAttribute('aria-pressed', String(!practice));
+$('#difficulty').addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-diff]');
+  if(!btn) return;
+  state.difficulty=btn.dataset.diff;
+  $$('#difficulty button').forEach(b=>
+    b.setAttribute('aria-pressed',String(b===btn))
+  );
+  if(state.mode==='practice') newQuestion();
+});
+
+function setMode(mode){
+  state.mode=mode;
+  const practice=mode==='practice';
+
+  $('#practice').style.display=practice?'grid':'none';
+  $('#worksheet').style.display=practice?'none':'block';
+  $('#practiceBtn').setAttribute('aria-pressed',String(practice));
+  $('#worksheetBtn').setAttribute('aria-pressed',String(!practice));
 
   if(practice){
     newQuestion();
-  }else if(!$('#wsList').children.length){
-    buildWorksheet();
+  }else{
+    $('#wsDifficulty').value=state.difficulty;
+    if(!$('#wsList').children.length) renderWorksheet();
   }
 }
 
-$('#practiceBtn').addEventListener('click', ()=>switchMode('practice'));
-$('#worksheetBtn').addEventListener('click', ()=>switchMode('worksheet'));
+$('#practiceBtn').addEventListener('click',()=>setMode('practice'));
+$('#worksheetBtn').addEventListener('click',()=>setMode('worksheet'));
 
-$('#contrastBtn').addEventListener('click', ()=>{
-  const on = document.body.classList.toggle('high-contrast');
-  $('#contrastBtn').setAttribute('aria-pressed', String(on));
+$('#contrastBtn').addEventListener('click',()=>{
+  const on=document.body.classList.toggle('high-contrast');
+  $('#contrastBtn').setAttribute('aria-pressed',String(on));
 });
 
-$$('button[data-size]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    state.worksheetSize = Number(btn.dataset.size);
-    $$('button[data-size]').forEach(b=>b.classList.toggle('primary', b===btn));
-    buildWorksheet();
-  });
-});
+function renderWorksheet(){
+  const diff=$('#wsDifficulty').value;
+  const count=Number($('#wsCount').value)||10;
+  const list=$('#wsList');
+  list.innerHTML='';
 
-function buildWorksheet(){
-  const list = $('#wsList');
-  list.innerHTML = '';
-
-  for(let i=1;i<=state.worksheetSize;i++){
-    const [p,a] = generatePercentAmount();
-    const ans = exactPercentOfAmount(p,a);
-
-    const item = document.createElement('div');
-    item.className = 'ws-item';
-    item.innerHTML = `
-      <div><strong>${i}.</strong> What is ${p}% of ${a}?</div>
+  for(let i=0;i<count;i++){
+    const q=generateQuestion(diff);
+    const li=document.createElement('li');
+    li.className='ws-item';
+    li.innerHTML=`
+      <div class="ws-question">${questionText(q)}</div>
       <button class="ws-reveal" aria-expanded="false">Reveal</button>
-      <div class="ws-answer"><strong>Answer:</strong> ${formatNumber(ans)}</div>`;
+      <div class="ws-answer">Answer: ${formatCents(q.cents)}</div>`;
 
-    const reveal = item.querySelector('.ws-reveal');
-    const answer = item.querySelector('.ws-answer');
-    reveal.addEventListener('click', ()=>{
-      const showing = answer.style.display === 'block';
-      answer.style.display = showing ? 'none' : 'block';
-      reveal.textContent = showing ? 'Reveal' : 'Hide';
-      reveal.setAttribute('aria-expanded', String(!showing));
+    const btn=li.querySelector('.ws-reveal');
+    const ans=li.querySelector('.ws-answer');
+    btn.addEventListener('click',()=>{
+      const showing=ans.style.display==='block';
+      ans.style.display=showing?'none':'block';
+      btn.textContent=showing?'Reveal':'Hide';
+      btn.setAttribute('aria-expanded',String(!showing));
     });
 
-    list.appendChild(item);
+    list.appendChild(li);
   }
 }
 
-$('#generateWs').addEventListener('click', buildWorksheet);
-$('#revealAll').addEventListener('click', ()=>{
+$('#generateWs').addEventListener('click',renderWorksheet);
+$('#revealAll').addEventListener('click',()=>{
   $$('#wsList .ws-answer').forEach(a=>a.style.display='block');
   $$('#wsList .ws-reveal').forEach(b=>{
     b.textContent='Hide';
     b.setAttribute('aria-expanded','true');
   });
 });
-$('#hideAll').addEventListener('click', ()=>{
+$('#hideAll').addEventListener('click',()=>{
   $$('#wsList .ws-answer').forEach(a=>a.style.display='none');
   $$('#wsList .ws-reveal').forEach(b=>{
     b.textContent='Reveal';
     b.setAttribute('aria-expanded','false');
   });
 });
-$('#printWs').addEventListener('click', ()=>window.print());
+$('#printWs').addEventListener('click',()=>window.print());
 
-/* Developer checks: add ?dev=1 to URL */
+/* Developer checks: append ?dev=1 */
 function runDevTests(){
-  const tests = [];
-  const assert = (name,cond)=>tests.push({name,pass:!!cond});
+  const failures=[];
+  const assert=(name,cond)=>{if(!cond)failures.push(name)};
 
-  assert('25% of 20 = 5', exactPercentOfAmount(25,20)===5);
-  assert('125% of 40 = 50', exactPercentOfAmount(125,40)===50);
-  assert('comma decimal accepted', parseAnswer('12,5')===12.5);
+  assert('15% increase 100 = 115', resultCents(100,150,'increase')===11500);
+  assert('15% decrease 100 = 85', resultCents(100,150,'decrease')===8500);
+  assert('12.5% increase 50 = 56.25', resultCents(50,125,'increase')===5625);
+  assert('90.5% decrease 999 = 94.91', resultCents(999,905,'decrease')===9491);
+  assert('comma input', parseAnswer('56,25')===56.25);
   assert('blank rejected', parseAnswer('')===null);
   assert('junk rejected', parseAnswer('12abc')===null);
 
-  const ranges = {
-    foundation:{p:[25,90],a:[5,30]},
-    core:{p:[90,120],a:[10,60]},
-    challenge:{p:[121,250],a:[10,100]}
-  };
-  for(const [diff,r] of Object.entries(ranges)){
-    for(let i=0;i<5000;i++){
-      const [p,a] = generatePercentAmount(diff);
-      assert(`${diff} range`, p>=r.p[0] && p<=r.p[1] && a>=r.a[0] && a<=r.a[1]);
-      const ans = exactPercentOfAmount(p,a);
-      assert(`${diff} answer <= 2dp`, Math.abs(ans*100-Math.round(ans*100))<1e-9);
+  // Exhaustive mathematical audit of all allowed base/percent combinations,
+  // both increase and decrease.
+  const configs={
+    foundation:{bases:[10,150], percents:Array.from({length:26},(_,i)=>5+i)},
+    core:{bases:[20,200], percents:Array.from({length:51},(_,i)=>10+i)},
+    challenge:{
+      bases:[50,999],
+      percents:[
+        ...Array.from({length:90},(_,i)=>1+i),
+        ...Array.from({length:90},(_,i)=>1.5+i)
+      ]
     }
+  };
+
+  for(const [diff,cfg] of Object.entries(configs)){
+    for(let base=cfg.bases[0];base<=cfg.bases[1];base++){
+      for(const p of cfg.percents){
+        const pt=percentTenths(p);
+        for(const type of ['increase','decrease']){
+          const cents=resultCents(base,pt,type);
+          const exact=base*(type==='increase'?(1+p/100):(1-p/100));
+          const expected=Math.floor(exact*100+0.500000001);
+          if(cents!==expected){
+            failures.push(`${diff}: ${base}, ${p}, ${type}`);
+            break;
+          }
+          if(cents<0){
+            failures.push(`${diff}: negative result`);
+            break;
+          }
+        }
+        if(failures.length) break;
+      }
+      if(failures.length) break;
+    }
+    if(failures.length) break;
   }
 
-  console.table(tests.filter(t=>!t.pass));
-  console.log(tests.every(t=>t.pass) ? 'DEV TESTS: PASS' : 'DEV TESTS: FAIL');
+  console.log(failures.length ? 'DEV TESTS: FAIL' : 'DEV TESTS: PASS', failures);
 }
 
 newQuestion();
